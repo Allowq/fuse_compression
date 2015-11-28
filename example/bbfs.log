@@ -1,0 +1,308 @@
+
+bb_init()
+    conn:
+    proto_major = 7
+    proto_minor = 23
+    async_read = 1
+    max_write = 131072
+    max_readahead = 131072
+    capable = 00000ffb
+    want = 00000010
+    max_background = 0
+    congestion_threshold = 0
+    context:
+    fuse = 01afc560
+    uid = 0
+    gid = 0
+    pid = 0
+    private_data = 01afb010
+    logfile = 01afc050
+    rootdir = /home/bb_user/bbfs/example/rootdir
+    umask = 00000
+
+bb_access(path="/", mask=04)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/", fpath = "/home/bb_user/bbfs/example/rootdir/"
+
+bb_getattr(path="/.Trash", statbuf=0xf36c0cc0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/.Trash", fpath = "/home/bb_user/bbfs/example/rootdir/.Trash"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/.Trash-0", statbuf=0xf2ebfcc0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/.Trash-0", fpath = "/home/bb_user/bbfs/example/rootdir/.Trash-0"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/", statbuf=0xf36c0c90)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/", fpath = "/home/bb_user/bbfs/example/rootdir/"
+    si:
+    st_dev = 2056
+    st_ino = 3286846
+    st_mode = 040755
+    st_nlink = 2
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 4096
+    st_blksize = 4096
+    st_blocks = 8
+    st_atime = 0x5659bfce
+    st_mtime = 0x5659bfcc
+    st_ctime = 0x5659bfcc
+
+bb_opendir(path="/", fi=0xf36c0cb0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/", fpath = "/home/bb_user/bbfs/example/rootdir/"
+    fi:
+    flags = 0x00018800
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x00007f6aec000c80
+    lock_owner = 0x0000000000000000
+
+bb_readdir(path="/", buf=0xec000af0, filler=0xf3e95140, offset=0, fi=0xf2ebfcb0)
+calling filler with name ..
+calling filler with name .
+    fi:
+    flags = 0x00000000
+    fh_old = 0x7f6aec000c80
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x00007f6aec000c80
+    lock_owner = 0x0000000000000000
+
+bb_releasedir(path="/", fi=0xf2ebfcc0)
+    fi:
+    flags = 0x00000000
+    fh_old = 0x7f6aec000c80
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x00007f6aec000c80
+    lock_owner = 0x0000000000000000
+
+bb_getattr(path="/", statbuf=0xf36c0c90)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/", fpath = "/home/bb_user/bbfs/example/rootdir/"
+    si:
+    st_dev = 2056
+    st_ino = 3286846
+    st_mode = 040755
+    st_nlink = 2
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 4096
+    st_blksize = 4096
+    st_blocks = 8
+    st_atime = 0x5659bfce
+    st_mtime = 0x5659bfcc
+    st_ctime = 0x5659bfcc
+
+bb_getattr(path="/compile.compr", statbuf=0xf2ebfcc0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/compile.compr", fpath = "/home/bb_user/bbfs/example/rootdir/compile.compr"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/compile.compr", statbuf=0xf36c0cc0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/compile.compr", fpath = "/home/bb_user/bbfs/example/rootdir/compile.compr"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_create(path="/compile.compr", mode=0100755, fi=0xf2ebfd60)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/compile.compr", fpath = "/home/bb_user/bbfs/example/rootdir/compile.compr"
+    fi:
+    flags = 0x000080c1
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000005
+    lock_owner = 0x0000000000000000
+
+bb_fgetattr(path="/compile.compr", statbuf=0xf2ebfc80, fi=0xf2ebfd60)
+    fi:
+    flags = 0x000080c1
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000005
+    lock_owner = 0x0000000000000000
+    si:
+    st_dev = 2056
+    st_ino = 3286873
+    st_mode = 0100755
+    st_nlink = 1
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 4096
+    st_blocks = 0
+    st_atime = 0x5659bfe9
+    st_mtime = 0x5659bfe9
+    st_ctime = 0x5659bfe9
+
+bb_write(path="/compile.compr", buf=0xf429d060, size=1865, offset=0, fi=0xf36c0dc0)
+    fi:
+    flags = 0x00008001
+    fh_old = 0x00000005
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000005
+    lock_owner = 0x0000000000000000
+
+ >>>> 9325, 2179
+
+ >>>> 3707, 0
+
+bb_flush(path="/compile.compr", fi=0xf2ebfd60)
+    fi:
+    flags = 0x00000000
+    fh_old = 0x00000005
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000005
+    lock_owner = 0x7b4b489cb6dd3fea
+
+bb_release(path="/compile.compr", fi=0xf36c0d60)
+    fi:
+    flags = 0x00008001
+    fh_old = 0x00000005
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000005
+    lock_owner = 0x0000000000000000
+
+be_uncompressed(be = "/compile", was = "/compile.compr"
+
+bb_rename(fpath="/compile.compr", newpath="/compile")
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/compile.compr", fpath = "/home/bb_user/bbfs/example/rootdir/compile.compr"
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/compile", fpath = "/home/bb_user/bbfs/example/rootdir/compile"
+
+bb_getattr(path="/", statbuf=0xf2ebfc90)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/", fpath = "/home/bb_user/bbfs/example/rootdir/"
+    si:
+    st_dev = 2056
+    st_ino = 3286846
+    st_mode = 040755
+    st_nlink = 2
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 4096
+    st_blksize = 4096
+    st_blocks = 8
+    st_atime = 0x5659bfce
+    st_mtime = 0x5659bfe9
+    st_ctime = 0x5659bfe9
+
+bb_opendir(path="/", fi=0xf36c0cb0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/", fpath = "/home/bb_user/bbfs/example/rootdir/"
+    fi:
+    flags = 0x00018800
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x00007f6aec000c80
+    lock_owner = 0x0000000000000000
+
+bb_readdir(path="/", buf=0xec000af0, filler=0xf3e95140, offset=0, fi=0xf2ebfcb0)
+calling filler with name ..
+calling filler with name compile
+calling filler with name .
+    fi:
+    flags = 0x00000000
+    fh_old = 0x7f6aec000c80
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x00007f6aec000c80
+    lock_owner = 0x0000000000000000
+
+bb_getattr(path="/compile", statbuf=0xf36c0cc0)
+    bb_fullpath:  rootdir = "/home/bb_user/bbfs/example/rootdir", path = "/compile", fpath = "/home/bb_user/bbfs/example/rootdir/compile"
+    si:
+    st_dev = 2056
+    st_ino = 3286873
+    st_mode = 0100755
+    st_nlink = 1
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 3707
+    st_blksize = 4096
+    st_blocks = 8
+    st_atime = 0x5659bfe9
+    st_mtime = 0x5659bfe9
+    st_ctime = 0x5659bfe9
+
+bb_releasedir(path="/", fi=0xf36c0cc0)
+    fi:
+    flags = 0x00000000
+    fh_old = 0x7f6aec000c80
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x00007f6aec000c80
+    lock_owner = 0x0000000000000000
+
+bb_destroy(userdata=0x01afb010)
