@@ -449,8 +449,7 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 			
 		if (pCmp) {
 			log_msg("\n >>>> %lld, %lld\n", cmp_len, src_len);
-			//cmp_status = compress2(pCmp, &cmp_len, (const unsigned char *)buf, src_len, 9);
-			cmp_status = compress(pCmp, &cmp_len, (const unsigned char *)buf, src_len);
+			cmp_status = compress2(pCmp, &cmp_len, (const unsigned char *)buf, src_len, BB_DATA->bb_compress_level);
 			if (cmp_status == Z_OK) {
 				log_msg("\n >>>> %lld, %d\n", cmp_len, cmp_status);
 				
