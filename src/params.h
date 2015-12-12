@@ -25,7 +25,8 @@ struct bb_state {
     FILE *logfile;
     char *rootdir;
 	int be_compress;
-	int be_execute;
+	int bb_compress_type;
+	int bb_compress_level;
 	size_t be_offset;
 };
 

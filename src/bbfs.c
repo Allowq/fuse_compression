@@ -449,8 +449,8 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 			
 		if (pCmp) {
 			log_msg("\n >>>> %lld, %lld\n", cmp_len, src_len);
+			//cmp_status = compress2(pCmp, &cmp_len, (const unsigned char *)buf, src_len, 9);
 			cmp_status = compress(pCmp, &cmp_len, (const unsigned char *)buf, src_len);
-			
 			if (cmp_status == Z_OK) {
 				log_msg("\n >>>> %lld, %d\n", cmp_len, cmp_status);
 				
@@ -940,7 +940,6 @@ int bb_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 	 else 
 		BB_DATA->be_compress = 0;
 	
-	BB_DATA->be_execute = 0;
 	BB_DATA->be_offset = 0;
 
 	fd = creat(fpath, mode);
@@ -1095,12 +1094,13 @@ int main(int argc, char *argv[])
     // rootpoint or mountpoint whose name starts with a hyphen, but so
     // will a zillion other programs)
     if ((argc < 3) || (argv[argc-2][0] == '-') || (argv[argc-1][0] == '-'))
-	bb_usage();
+		bb_usage();
+	
 
     bb_data = malloc(sizeof(struct bb_state));
     if (bb_data == NULL) {
-	perror("main calloc");
-	abort();
+		perror("main calloc");
+		abort();
     }
 
     // Pull the rootdir out of the argument list and save it in my
@@ -1109,11 +1109,18 @@ int main(int argc, char *argv[])
     argv[argc-2] = argv[argc-1];
     argv[argc-1] = NULL;
     argc--;
+	
+	if (!get_compress_set(bb_data->rootdir, &bb_data->bb_compress_type, &bb_data->bb_compress_level)) {
+		perror("compression settings not found");
+		abort();
+	}
+
+	fprintf(stderr, "Compression level: %d\n", bb_data->bb_compress_level); 
+	fprintf(stderr, "*.compr - extension for compressed files\n"); 
     
     bb_data->logfile = log_open();
     
     // turn over control to fuse
-    fprintf(stderr, "about to call fuse_main\n");
     fuse_stat = fuse_main(argc, argv, &bb_oper, bb_data);
     fprintf(stderr, "fuse_main returned %d\n", fuse_stat);
     

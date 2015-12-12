@@ -10,6 +10,7 @@
 #define _MY_UTIL_H_
 
 int ends_with(const char* haystack, const char* needle);
+int get_compress_set(const char* root_dir, int *type, int *level);
 int is_compressed(char *path, int *index);
 
 #endif
