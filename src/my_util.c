@@ -73,30 +73,34 @@ int is_compressed_with_index(const char *path, int *index) {
 	return 0;
 }
 
-int compress_block(const char *buf, const size_t size, unsigned char *pCmp, unsigned long *cmp_len, const int compress_level) {
+int compress_block(const char *buf, const size_t size, unsigned char *pCmp, unsigned long *cmp_len, struct MINIZ_STATE *m_state) {
 	int cmp_status = 0;
 	*cmp_len = compressBound(size);
 	uLong src_len = size;
 			
 	if (pCmp) {
-		cmp_status = compress2(pCmp, cmp_len, (const unsigned char *)buf, src_len, compress_level);
-		if (cmp_status == Z_OK) 
+		cmp_status = compress2(pCmp, cmp_len, (const unsigned char *)buf, src_len, m_state->bb_compress_level);
+		if (cmp_status == Z_OK) {
+			m_state->be_offset += *cmp_len;
 			return 1;
+		}
 	}
 		
 	return 0;
 }
 
 
-int decompress_block(const char *buf, const size_t size, unsigned char *pUncomp, unsigned long *uncomp_len) {		
+int decompress_block(const char *buf, const size_t size, unsigned char *pUncomp, unsigned long *uncomp_len, struct MINIZ_STATE *m_state) {		
 	int cmp_status = 0;
 	uLong src_len = size;
 			
 	if (pUncomp) {
 		cmp_status = uncompress(pUncomp, uncomp_len, (const unsigned char *)buf, src_len);
 			
-		if (cmp_status == Z_OK) 
+		if (cmp_status == Z_OK) {
+			m_state->be_offset += *uncomp_len;
 			return 1;
+		}
 	}
 	
 	return 0;

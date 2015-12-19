@@ -440,14 +440,16 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 	if(ends_with(path, ".cmprs_set"))
 		retstat = pwrite(fi->fh, buf, size, offset);
 	else {
+		if (offset == 0)
+			BB_DATA->compress_state.be_offset = 0;
+			
 		if (is_compressed(path)) {
 			log_msg("************* DECOMPRESS FILE *************");
 			cmp_len = size * 5;
 			pCmp = (unsigned char*)malloc((size_t)cmp_len);
-			if (decompress_block(buf, size, pCmp, &cmp_len)) {
+			if (decompress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state)) {
 				log_msg("\nParameters: %d", cmp_len);
-				BB_DATA->be_offset += cmp_len;
-				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->be_offset - cmp_len);	
+				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);	
 				if (retstat >= 0) {
 					free(pCmp);
 					return size;
@@ -460,10 +462,10 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 		else {
 			log_msg("************* COMPRESS FILE *************");
 			pCmp = (unsigned char*)malloc((size_t)size);
-			if (compress_block(buf, size, pCmp, &cmp_len, BB_DATA->bb_compress_level)) {
+			if (compress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state)) {
 				log_msg("\nParameters: %d", cmp_len);
-				BB_DATA->be_offset += cmp_len;
-				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->be_offset - cmp_len);	
+				
+				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);	
 				if (retstat >= 0) {
 					free(pCmp);
 					return size;
@@ -908,10 +910,6 @@ int bb_create(const char *path, mode_t mode, struct fuse_file_info *fi)
 	char fpath[PATH_MAX] = {0};
     bb_fullpath(fpath, path);
 
-	int char_index = -1;
-	
-	BB_DATA->be_offset = 0;
-
 	fd = creat(fpath, mode);
 	
     if (fd < 0)
@@ -1080,12 +1078,12 @@ int main(int argc, char *argv[])
     argv[argc-1] = NULL;
     argc--;
 	
-	if (!get_compress_set(bb_data->rootdir, &bb_data->bb_compress_type, &bb_data->bb_compress_level)) {
+	if (!get_compress_set(bb_data->rootdir, &bb_data->compress_state.bb_compress_type, &bb_data->compress_state.bb_compress_level)) {
 		perror("compression settings not found");
 		abort();
 	}
 
-	fprintf(stderr, "Compression level: %d\n", bb_data->bb_compress_level); 
+	fprintf(stderr, "Compression level: %d\n", bb_data->compress_state.bb_compress_level); 
 	fprintf(stderr, "*.compr - extension for compressed files\n"); 
     
     bb_data->logfile = log_open();

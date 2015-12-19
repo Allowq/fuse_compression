@@ -22,13 +22,17 @@
 #include <limits.h>
 #include <stdio.h>
 
-struct bb_state {
-    FILE *logfile;
-    char *rootdir;
+struct MINIZ_STATE {
 	int be_compress;
 	int bb_compress_type;
 	int bb_compress_level;
 	size_t be_offset;
+};
+
+struct bb_state {
+    FILE *logfile;
+    char *rootdir;
+	struct MINIZ_STATE compress_state;
 };
 
 // be_compress == 1 if file is compressed
