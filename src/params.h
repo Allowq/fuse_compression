@@ -21,6 +21,7 @@
 // maintain bbfs state in here
 #include <limits.h>
 #include <stdio.h>
+
 struct bb_state {
     FILE *logfile;
     char *rootdir;

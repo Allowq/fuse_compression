@@ -23,7 +23,6 @@
 
 #include "params.h"
 #include "my_util.h"
-#include "miniz.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -426,6 +425,10 @@ int bb_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_
 int bb_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     int retstat = 0;
+	unsigned char *pCmp;
+	unsigned long cmp_len;
+
+	fprintf(stderr, "HUI\n");
     
     log_msg("\nbb_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
 	    path, buf, size, offset, fi
@@ -434,72 +437,42 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
     log_fi(fi);
 
 
-	int is_fail = 0;
-	uLong cmp_len = 0;
-
-	// file isn't compressed
-	if(BB_DATA->be_compress == 0) {
-
-		unsigned char *pCmp;
-		int cmp_status = 0;
-
-		cmp_len = compressBound(size);
-		uLong src_len = size;
-		pCmp = (mz_uint8 *)malloc((size_t)cmp_len);
-			
-		if (pCmp) {
-			log_msg("\n >>>> %lld, %lld\n", cmp_len, src_len);
-			cmp_status = compress2(pCmp, &cmp_len, (const unsigned char *)buf, src_len, BB_DATA->bb_compress_level);
-			if (cmp_status == Z_OK) {
-				log_msg("\n >>>> %lld, %d\n", cmp_len, cmp_status);
-				
+	if(ends_with(path, ".cmprs_set"))
+		retstat = pwrite(fi->fh, buf, size, offset);
+	else {
+		if (is_compressed(path)) {
+			log_msg("************* DECOMPRESS FILE *************");
+			cmp_len = size * 5;
+			pCmp = (unsigned char*)malloc((size_t)cmp_len);
+			if (decompress_block(buf, size, pCmp, &cmp_len)) {
+				log_msg("\nParameters: %d", cmp_len);
 				BB_DATA->be_offset += cmp_len;
-				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->be_offset - cmp_len);
-				
+				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->be_offset - cmp_len);	
 				if (retstat >= 0) {
 					free(pCmp);
 					return size;
 				}
-			} else
-				is_fail = 1;
-				
-			free(pCmp);
-		} 
+			} 
 			
-		if (is_fail == 1)
 			retstat = pwrite(fi->fh, buf, size, offset);
-	} 
-	else {	
-		unsigned char *pUncomp;
-		int cmp_status = 0;
-
-		uLong src_len = size;
-		uLong uncomp_len = src_len * 5;
-		cmp_len = compressBound(src_len);
-		pUncomp = (mz_uint8 *)malloc((size_t)uncomp_len);
-			
-		if (pUncomp) {
-			log_msg("\n >>>> %lld, %lld\n", uncomp_len, cmp_len);
-			cmp_status = uncompress(pUncomp, &uncomp_len, (const unsigned char *)buf, src_len);
-			
-			if (cmp_status == Z_OK) {
-				log_msg("\n >>>> %lld, %d\n", uncomp_len, cmp_status);  
-				
-				BB_DATA->be_offset += uncomp_len;
-				retstat = pwrite(fi->fh, pUncomp, uncomp_len, BB_DATA->be_offset - uncomp_len);
+			free(pCmp);
+		}
+		else {
+			log_msg("************* COMPRESS FILE *************");
+			pCmp = (unsigned char*)malloc((size_t)size);
+			if (compress_block(buf, size, pCmp, &cmp_len, BB_DATA->bb_compress_level)) {
+				log_msg("\nParameters: %d", cmp_len);
+				BB_DATA->be_offset += cmp_len;
+				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->be_offset - cmp_len);	
 				if (retstat >= 0) {
-					free(pUncomp);
+					free(pCmp);
 					return size;
 				}
-				
-			} else
-				is_fail = 1;
-				
-			free(pUncomp);
-		} 
+			} 
 			
-		if (is_fail == 1)
 			retstat = pwrite(fi->fh, buf, size, offset);
+			free(pCmp);
+		}
 	}
 
 	if (retstat < 0) 
@@ -593,18 +566,21 @@ int bb_release(const char *path, struct fuse_file_info *fi)
     // (buffers etc) we'd need to free them here as well.
     retstat = close(fi->fh);
 
-	int char_index = -1;
-    char re_path[PATH_MAX] = {0};
-	
-	if (is_compressed(path, &char_index)) {
-		strncpy(re_path, path, char_index);
-		log_msg("\nbe_uncompressed(be = \"%s\", was = \"%s\"\n", re_path, path);
-		bb_rename(path, re_path);
-	} else {
-		strcpy(re_path, path);
-		strcat(re_path, ".compr");
-		log_msg("\nbe_compressed(be = \"%s\", was = \"%s\"\n", re_path, path); 
-		bb_rename(path, re_path);
+	if(!ends_with(path, ".cmprs_set")) {
+		int char_index = -1;
+		char re_path[PATH_MAX] = {0};
+
+		if (is_compressed_with_index(path, &char_index)) {
+			strncpy(re_path, path, char_index);
+			log_msg("\nbe_uncompressed(be = \"%s\", was = \"%s\"\n", re_path, path);
+			bb_rename(path, re_path);
+		}
+		else {
+			strcpy(re_path, path);
+			strcat(re_path, ".compr");
+			log_msg("\nbe_compressed(be = \"%s\", was = \"%s\"\n", re_path, path); 
+			bb_rename(path, re_path);
+		}
 	}
     
     return retstat;
@@ -784,8 +760,8 @@ int bb_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset
     // which I can get an error from readdir()
     de = readdir(dp);
     if (de == 0) {
-	retstat = bb_error("bb_readdir readdir");
-	return retstat;
+		retstat = bb_error("bb_readdir readdir");
+		return retstat;
     }
 
     // This will copy the entire directory into the buffer.  The loop exits
@@ -793,11 +769,11 @@ int bb_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset
     // returns something non-zero.  The first case just means I've
     // read the whole directory; the second means the buffer is full.
     do {
-	log_msg("calling filler with name %s\n", de->d_name);
-	if (filler(buf, de->d_name, NULL, 0) != 0) {
-	    log_msg("    ERROR bb_readdir filler:  buffer full");
-	    return -ENOMEM;
-	}
+		log_msg("calling filler with name %s\n", de->d_name);
+		if (filler(buf, de->d_name, NULL, 0) != 0) {
+			log_msg("    ERROR bb_readdir filler:  buffer full");
+			return -ENOMEM;
+		}
     } while ((de = readdir(dp)) != NULL);
     
     log_fi(fi);
@@ -933,11 +909,6 @@ int bb_create(const char *path, mode_t mode, struct fuse_file_info *fi)
     bb_fullpath(fpath, path);
 
 	int char_index = -1;
-	
-	if (is_compressed(fpath, &char_index)) 
-		BB_DATA->be_compress = 1;
-	 else 
-		BB_DATA->be_compress = 0;
 	
 	BB_DATA->be_offset = 0;
 

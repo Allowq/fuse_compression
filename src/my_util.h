@@ -9,8 +9,11 @@
 #ifndef _MY_UTIL_H_
 #define _MY_UTIL_H_
 
+int compress_block(const char *buf, const size_t size, unsigned char *pCmp, unsigned long *cmp_len, const int compress_level);
+int decompress_block(const char *buf, const size_t size, unsigned char *pUncomp, unsigned long *uncomp_len);
 int ends_with(const char* haystack, const char* needle);
 int get_compress_set(const char* root_dir, int *type, int *level);
-int is_compressed(char *path, int *index);
+int is_compressed(const char *path);
+int is_compressed_with_index(const char *path, int *index);
 
 #endif
