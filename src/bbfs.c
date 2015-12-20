@@ -372,8 +372,8 @@ int bb_open(const char *path, struct fuse_file_info *fi)
     
     fd = open(fpath, fi->flags);
     if (fd < 0)
-	retstat = bb_error("bb_open open");
-    
+		retstat = bb_error("bb_open open");
+	
     fi->fh = fd;
     log_fi(fi);
     
@@ -426,51 +426,51 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 {
     int retstat = 0;
 	unsigned char *pCmp;
-	unsigned long cmp_len;
+	unsigned long cmp_len;  
 
-	fprintf(stderr, "HUI\n");
-    
-    log_msg("\nbb_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
+	log_msg("\nbb_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
 	    path, buf, size, offset, fi
 	    );
+
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);
-
 
 	if(ends_with(path, ".cmprs_set"))
 		retstat = pwrite(fi->fh, buf, size, offset);
 	else {
-		if (offset == 0)
+		if (offset == 0) 
 			BB_DATA->compress_state.be_offset = 0;
 			
 		if (is_compressed(path)) {
-			log_msg("************* DECOMPRESS FILE *************");
 			cmp_len = size * 5;
+			int step = 0;
 			pCmp = (unsigned char*)malloc((size_t)cmp_len);
-			if (decompress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state)) {
-				log_msg("\nParameters: %d", cmp_len);
-				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);	
+			if ( pCmp && decompress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
+				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
+				//log_msg("\n CHECK RETSTAT: %d, cmp_len: %d\n", retstat, cmp_len);
 				if (retstat >= 0) {
 					free(pCmp);
 					return size;
 				}
 			} 
+			//log_msg("\n YA POIMAL OSIBKU: %d\n", step);
 			
 			retstat = pwrite(fi->fh, buf, size, offset);
 			free(pCmp);
 		}
 		else {
-			log_msg("************* COMPRESS FILE *************");
-			pCmp = (unsigned char*)malloc((size_t)size);
-			if (compress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state)) {
-				log_msg("\nParameters: %d", cmp_len);
-				
+			pCmp = (unsigned char*)malloc((size_t)size * 2);
+			cmp_len = size * 2;
+			int step = 0;
+			if ( pCmp && compress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {				
 				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);	
+				//log_msg("\n CHECK RETSTAT: %d, cmp_len: %d\n", retstat, cmp_len);
 				if (retstat >= 0) {
 					free(pCmp);
 					return size;
 				}
 			} 
+			//log_msg("\n YA POIMAL OSIBKU: %d\n", step);
 			
 			retstat = pwrite(fi->fh, buf, size, offset);
 			free(pCmp);
@@ -573,11 +573,13 @@ int bb_release(const char *path, struct fuse_file_info *fi)
 		char re_path[PATH_MAX] = {0};
 
 		if (is_compressed_with_index(path, &char_index)) {
+			free_zstream_struct(&BB_DATA->compress_state, 0);
 			strncpy(re_path, path, char_index);
 			log_msg("\nbe_uncompressed(be = \"%s\", was = \"%s\"\n", re_path, path);
 			bb_rename(path, re_path);
 		}
 		else {
+			free_zstream_struct(&BB_DATA->compress_state, 1);
 			strcpy(re_path, path);
 			strcat(re_path, ".compr");
 			log_msg("\nbe_compressed(be = \"%s\", was = \"%s\"\n", re_path, path); 
@@ -907,7 +909,7 @@ int bb_create(const char *path, mode_t mode, struct fuse_file_info *fi)
     log_msg("\nbb_create(path=\"%s\", mode=0%03o, fi=0x%08x)\n",
 	    path, mode, fi);
 
-	char fpath[PATH_MAX] = {0};
+	char fpath[PATH_MAX] = {0}, mpath[PATH_MAX] = {0};
     bb_fullpath(fpath, path);
 
 	fd = creat(fpath, mode);
@@ -1074,6 +1076,7 @@ int main(int argc, char *argv[])
     // Pull the rootdir out of the argument list and save it in my
     // internal data
     bb_data->rootdir = realpath(argv[argc-2], NULL);
+	bb_data->mount_dir = realpath(argv[argc-1], NULL);
     argv[argc-2] = argv[argc-1];
     argv[argc-1] = NULL;
     argc--;

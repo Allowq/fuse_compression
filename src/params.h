@@ -22,18 +22,22 @@
 #include <limits.h>
 #include <stdio.h>
 
-struct MINIZ_STATE {
-	int be_compress;
+typedef struct MINIZ_STATE {
 	int bb_compress_type;
 	int bb_compress_level;
 	size_t be_offset;
-};
 
-struct bb_state {
+	unsigned char s_inbuf[4096];
+	unsigned char s_outbuf[5 * 4096];
+	void *stream_struct;
+} MINIZ_STATE;
+
+typedef struct bb_state {
     FILE *logfile;
     char *rootdir;
-	struct MINIZ_STATE compress_state;
-};
+	char *mount_dir;
+	MINIZ_STATE compress_state;
+} bb_state;
 
 // be_compress == 1 if file is compressed
 // be_compress == 0 if file not compresses
