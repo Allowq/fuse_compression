@@ -24,7 +24,7 @@ int decompress_block(const char *buf,
                      MINIZ_STATE *m_state, 
                      int *locheck_lines);
 int ends_with(const char* haystack, const char* needle);
-void free_zstream_struct(MINIZ_STATE *m_state, int inflate_status);
+int free_zstream_struct(MINIZ_STATE *m_state, int inflate_status);
 int get_compress_set(const char* root_dir, int *type, int *level);
 int is_compressed(const char *path);
 int is_compressed_with_index(const char *path, int *index);

@@ -442,38 +442,64 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 			BB_DATA->compress_state.be_offset = 0;
 			
 		if (is_compressed(path)) {
-			cmp_len = size * 5;
+			// счётчик строк, сколько успешно выполнилось команд из последовательности
 			int step = 0;
+
+			// выходящий блок у нас по умолчанию 16 кбайт
+			cmp_len = s_outbuf_size;
 			pCmp = (unsigned char*)malloc((size_t)cmp_len);
-			if ( pCmp && decompress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
-				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
-				//log_msg("\n CHECK RETSTAT: %d, cmp_len: %d\n", retstat, cmp_len);
-				if (retstat >= 0) {
-					free(pCmp);
-					return size;
+
+			if ( pCmp ) {
+				if (decompress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
+					// если кодировщик готов выдать нам порцию данных
+					if (cmp_len > 0)
+						// то мы её записываем в файл
+						retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
+					else
+						retstat = 0;
+
+					log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+
+					if (retstat >= 0) {
+						free(pCmp);
+						return size;
+					}
 				}
+
+				log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+
+				free(pCmp);
 			} 
-			//log_msg("\n YA POIMAL OSIBKU: %d\n", step);
-			
 			retstat = pwrite(fi->fh, buf, size, offset);
-			free(pCmp);
 		}
 		else {
-			pCmp = (unsigned char*)malloc((size_t)size * 2);
-			cmp_len = size * 2;
 			int step = 0;
-			if ( pCmp && compress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {				
-				retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);	
-				//log_msg("\n CHECK RETSTAT: %d, cmp_len: %d\n", retstat, cmp_len);
-				if (retstat >= 0) {
-					free(pCmp);
-					return size;
+
+			cmp_len = s_outbuf_size;
+			pCmp = (unsigned char*)malloc((size_t)cmp_len);
+
+			if ( pCmp )
+			{
+				if ( compress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
+					if (cmp_len > 0)
+						retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
+					else
+						retstat = 0;
+
+					log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+
+					if (retstat >= 0) {
+						free(pCmp);
+						return size;
+					}
 				}
-			} 
-			//log_msg("\n YA POIMAL OSIBKU: %d\n", step);
+
+				log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+
+				free(pCmp);
+			}
 			
 			retstat = pwrite(fi->fh, buf, size, offset);
-			free(pCmp);
 		}
 	}
 
@@ -536,6 +562,13 @@ int bb_flush(const char *path, struct fuse_file_info *fi)
 {
     int retstat = 0;
     
+    if( ( ends_with(path, ".cmprs_set") == 0 ) ) { //&& (is_compressed(path) == 0) ) {
+    	BB_DATA->compress_state.bb_write_final_block = 1;
+    	retstat = bb_write(path, NULL, 0, 0, fi);
+    	if (retstat >= 0)
+    		log_msg("\nbb_write_final_block(path=\"%s\", fi=0x%08x)\n", path, fi);
+    }
+
     log_msg("\nbb_flush(path=\"%s\", fi=0x%08x)\n", path, fi);
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);

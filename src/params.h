@@ -22,13 +22,17 @@
 #include <limits.h>
 #include <stdio.h>
 
-typedef struct MINIZ_STATE {
+#define s_inbuf_size 4096
+#define s_outbuf_size 16384
+
+typedef struct MINIZ_STATE_STRUCT {
 	int bb_compress_type;
 	int bb_compress_level;
 	size_t be_offset;
 
-	unsigned char s_inbuf[4096];
-	unsigned char s_outbuf[5 * 4096];
+	int bb_write_final_block;
+	unsigned char s_inbuf[s_inbuf_size];	// нам приходят блоки максимум по 4 кбайта (задано в системе)
+	unsigned char s_outbuf[s_outbuf_size];	// попробуем собирать буфер более 4 кбайт
 	void *stream_struct;
 } MINIZ_STATE;
 
