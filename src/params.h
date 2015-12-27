@@ -23,13 +23,14 @@
 #include <stdio.h>
 
 #define s_inbuf_size 4096
-#define s_outbuf_size 16384
+#define s_outbuf_size 16382
 
 typedef struct MINIZ_STATE_STRUCT {
 	int bb_compress_type;
 	int bb_compress_level;
 	size_t be_offset;
 
+	int flate_init;
 	int bb_write_final_block;
 	unsigned char s_inbuf[s_inbuf_size];	// нам приходят блоки максимум по 4 кбайта (задано в системе)
 	unsigned char s_outbuf[s_outbuf_size];	// попробуем собирать буфер более 4 кбайт

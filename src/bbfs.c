@@ -466,7 +466,7 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 					}
 				}
 
-				log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+				log_msg("\n ERROR RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
 
 				free(pCmp);
 			} 
@@ -494,7 +494,7 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 					}
 				}
 
-				log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+				log_msg("\n ERROR RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
 
 				free(pCmp);
 			}
@@ -562,9 +562,9 @@ int bb_flush(const char *path, struct fuse_file_info *fi)
 {
     int retstat = 0;
     
-    if( ( ends_with(path, ".cmprs_set") == 0 ) ) { //&& (is_compressed(path) == 0) ) {
+    if( (ends_with(path, ".cmprs_set") == 0) ) { // && (is_compressed(path) == 0) ) {
     	BB_DATA->compress_state.bb_write_final_block = 1;
-    	retstat = bb_write(path, NULL, 0, 0, fi);
+    	retstat = bb_write(path, NULL, 0, 1, fi);
     	if (retstat >= 0)
     		log_msg("\nbb_write_final_block(path=\"%s\", fi=0x%08x)\n", path, fi);
     }
