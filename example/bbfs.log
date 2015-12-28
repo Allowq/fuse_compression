@@ -1,0 +1,292 @@
+
+bb_init()
+    conn:
+    proto_major = 7
+    proto_minor = 23
+    async_read = 1
+    max_write = 131072
+    max_readahead = 131072
+    capable = 00000ffb
+    want = 00000010
+    max_background = 0
+    congestion_threshold = 0
+    context:
+    fuse = 017e67f0
+    uid = 0
+    gid = 0
+    pid = 0
+    private_data = 017df010
+    logfile = 017e62b0
+    rootdir = /home/programming/workspace/fuse_compression/example/rootdir
+    umask = 00000
+
+bb_access(path="/", mask=04)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/"
+
+bb_getattr(path="/.Trash", statbuf=0xbbffecc0)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/.Trash", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/.Trash"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/.Trash-0", statbuf=0xc0a02cc0)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/.Trash-0", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/.Trash-0"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/", statbuf=0xbbffec90)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/"
+    si:
+    st_dev = 2055
+    st_ino = 534474
+    st_mode = 040755
+    st_nlink = 2
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 4096
+    st_blksize = 4096
+    st_blocks = 8
+    st_atime = 0x568180eb
+    st_mtime = 0x568180eb
+    st_ctime = 0x568180eb
+
+bb_getattr(path="/ellie.mp3", statbuf=0xc0a02cc0)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/ellie.mp3", statbuf=0xbbffecc0)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_create(path="/ellie.mp3", mode=0100600, fi=0xc0a02d60)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3"
+    fi:
+    flags = 0x000080c1
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x0000000000000000
+
+bb_fgetattr(path="/ellie.mp3", statbuf=0xc0a02c80, fi=0xc0a02d60)
+    fi:
+    flags = 0x000080c1
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x0000000000000000
+    si:
+    st_dev = 2055
+    st_ino = 534652
+    st_mode = 0100600
+    st_nlink = 1
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 4096
+    st_blocks = 0
+    st_atime = 0x56818175
+    st_mtime = 0x56818175
+    st_ctime = 0x56818175
+
+bb_write_final_block(path="/ellie.mp3", fi=0xbb7fdd60)
+
+bb_flush(path="/ellie.mp3", fi=0xbb7fdd60)
+    fi:
+    flags = 0x00000000
+    fh_old = 0x00000006
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x6dc1433aa1a69cd1
+
+bb_release(path="/ellie.mp3", fi=0xc0a02d60)
+    fi:
+    flags = 0x00008001
+    fh_old = 0x00000006
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x0000000000000000
+
+be_compressed(be = "/ellie.mp3.compr", was = "/ellie.mp3"
+
+bb_rename(fpath="/ellie.mp3", newpath="/ellie.mp3.compr")
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3"
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3.compr", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3.compr"
+
+bb_getattr(path="/", statbuf=0xbbffec90)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/"
+    si:
+    st_dev = 2055
+    st_ino = 534474
+    st_mode = 040755
+    st_nlink = 2
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 4096
+    st_blksize = 4096
+    st_blocks = 8
+    st_atime = 0x568180eb
+    st_mtime = 0x56818187
+    st_ctime = 0x56818187
+
+bb_getattr(path="/ellie.mp3.compr", statbuf=0xbb7fdcc0)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3.compr", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3.compr"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_getattr(path="/ellie.mp3.compr", statbuf=0xc0a02cc0)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3.compr", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3.compr"
+    ERROR bb_getattr lstat: No such file or directory
+    si:
+    st_dev = 0
+    st_ino = 0
+    st_mode = 00
+    st_nlink = 0
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 0
+    st_blocks = 0
+    st_atime = 0x00000000
+    st_mtime = 0x00000000
+    st_ctime = 0x00000000
+
+bb_create(path="/ellie.mp3.compr", mode=0100600, fi=0xbbffed60)
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3.compr", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3.compr"
+    fi:
+    flags = 0x000080c1
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x0000000000000000
+
+bb_fgetattr(path="/ellie.mp3.compr", statbuf=0xbbffec80, fi=0xbbffed60)
+    fi:
+    flags = 0x000080c1
+    fh_old = 0x00000000
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x0000000000000000
+    si:
+    st_dev = 2055
+    st_ino = 534645
+    st_mode = 0100600
+    st_nlink = 1
+    st_uid = 0
+    st_gid = 0
+    st_rdev = 0
+    st_size = 0
+    st_blksize = 4096
+    st_blocks = 0
+    st_atime = 0x56818192
+    st_mtime = 0x56818192
+    st_ctime = 0x56818192
+
+bb_flush(path="/ellie.mp3.compr", fi=0xbb7fdd60)
+    fi:
+    flags = 0x00000000
+    fh_old = 0x00000006
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x6dc1433aa1a69cd1
+
+bb_release(path="/ellie.mp3.compr", fi=0xc0a02d60)
+    fi:
+    flags = 0x00008001
+    fh_old = 0x00000006
+    writepage = 0
+    direct_io = 0
+    keep_cache = 0
+    fh = 0x0000000000000006
+    lock_owner = 0x0000000000000000
+
+be_uncompressed(be = "/ellie.mp3", was = "/ellie.mp3.compr"
+
+bb_rename(fpath="/ellie.mp3.compr", newpath="/ellie.mp3")
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3.compr", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3.compr"
+    bb_fullpath:  rootdir = "/home/programming/workspace/fuse_compression/example/rootdir", path = "/ellie.mp3", fpath = "/home/programming/workspace/fuse_compression/example/rootdir/ellie.mp3"
+
+bb_destroy(userdata=0x017df010)
