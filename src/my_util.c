@@ -94,15 +94,13 @@ int is_compressed_with_index(const char *path, int *index) {
 }
 
 int compress_block(const char *buf, 
-                   const size_t size, 
+				   unsigned long *size,
                    unsigned char *pCmp, 
                    unsigned long *cmp_len, 
                    MINIZ_STATE *m_state, 
                    int *check_lines) 
 {
-	// если смещение по файлу нулевое
 	if (m_state->be_offset == 0 && m_state->flate_init == 0) {
-		// значит структура deflate не инициализирована
 		m_state->stream_struct = malloc(sizeof(mz_stream));
 		memset(m_state->stream_struct, 0, sizeof(mz_stream));
 
@@ -113,26 +111,26 @@ int compress_block(const char *buf,
 
 		if (deflateInit(m_state->stream_struct, m_state->bb_compress_level) != Z_OK) {
 			*check_lines = 100;
-			return 0;
+			return -1;
 		}
 		m_state->flate_init = 1;
 	}
-		
+
 	if (pCmp && m_state->stream_struct) {
 		int cmp_status;
 
+		if (((mz_stream *)m_state->stream_struct)->avail_in == 0 && *size > 0) {
+			memcpy(m_state->s_inbuf, buf, *size);
+			((mz_stream *)m_state->stream_struct)->next_in = m_state->s_inbuf;
+			((mz_stream *)m_state->stream_struct)->avail_in = *size;
+			*size = 0;
+		}
+
 		if (m_state->bb_write_final_block == 1) {
 			m_state->bb_write_final_block = 0;
-			((mz_stream *)m_state->stream_struct)->avail_in = 0;
 			cmp_status = deflate(m_state->stream_struct, Z_FINISH);
-		}
-		else
-		{
-			memcpy(m_state->s_inbuf, buf, size);
-			((mz_stream *)m_state->stream_struct)->next_in = m_state->s_inbuf;
-			((mz_stream *)m_state->stream_struct)->avail_in = size;
+		} else
 			cmp_status = deflate(m_state->stream_struct, Z_NO_FLUSH);
-		}
 
 		if ( (cmp_status == Z_STREAM_END) || ( ((mz_stream *)m_state->stream_struct)->avail_out == 0 ) ) {
 			*cmp_len = s_outbuf_size - ((mz_stream *)m_state->stream_struct)->avail_out;
@@ -142,23 +140,24 @@ int compress_block(const char *buf,
 
 			memcpy((void*)pCmp, m_state->s_outbuf, *cmp_len);
 			m_state->be_offset += *cmp_len;
+		}
 
-			*check_lines = cmp_status;
-			return 1;
-		} else
-			*cmp_len = 0;
+		*check_lines = cmp_status;
 
-		*check_lines = ((mz_stream *)m_state->stream_struct)->total_in;
-		if ( (cmp_status == Z_OK) || (cmp_status == Z_STREAM_END) )
+		if (cmp_status == Z_STREAM_END || ( (((mz_stream *)m_state->stream_struct)->avail_in == 0) && (*size == 0) ) )
 			return 1;
+		else if (cmp_status != Z_OK)
+			return -1;
+		else
+			return 0;
 	}
-		
-	return 0;
+
+	return -1;
 }
 
 
 int decompress_block(const char *buf, 
-                     const size_t size, 
+                     unsigned long *size,
                      unsigned char *pUncomp, 
                      unsigned long *uncomp_len, 
                      MINIZ_STATE *m_state, 
@@ -169,7 +168,7 @@ int decompress_block(const char *buf,
 		memset(m_state->stream_struct, 0, sizeof(mz_stream));
 
 		((mz_stream *)m_state->stream_struct)->next_in = m_state->s_inbuf;
-		((mz_stream *)m_state->stream_struct)->avail_in = s_inbuf_size;
+		((mz_stream *)m_state->stream_struct)->avail_in = 0;
 		((mz_stream *)m_state->stream_struct)->next_out = m_state->s_outbuf;
 		((mz_stream *)m_state->stream_struct)->avail_out = s_outbuf_size;
 
@@ -184,31 +183,16 @@ int decompress_block(const char *buf,
 	if (pUncomp && m_state->stream_struct) {
 		int cmp_status;
 
-		if ( m_state->bb_write_final_block == 1 ) {
-			m_state->bb_write_final_block = 0;
-			((mz_stream *)m_state->stream_struct)->avail_in = 0;
-			cmp_status = inflate(m_state->stream_struct, Z_FINISH);
-		}
-		else{
-			memcpy(m_state->s_inbuf, buf, size);
+		if (((mz_stream *)m_state->stream_struct)->avail_in == 0 && *size > 0) {
+			memcpy(m_state->s_inbuf, buf, *size);
 			((mz_stream *)m_state->stream_struct)->next_in = m_state->s_inbuf;
-			((mz_stream *)m_state->stream_struct)->avail_in = size;
-			cmp_status = inflate(((mz_stream *)m_state->stream_struct), Z_SYNC_FLUSH);
+			((mz_stream *)m_state->stream_struct)->avail_in = *size;
+			*size = 0;
 		}
 
-		/*
-		if (size >= s_inbuf_size) {
-			memcpy(m_state->s_inbuf, buf, size);
-			((mz_stream *)m_state->stream_struct)->next_in = m_state->s_inbuf;
-			((mz_stream *)m_state->stream_struct)->avail_in = size;
-			cmp_status = inflate(((mz_stream *)m_state->stream_struct), Z_SYNC_FLUSH);
-		} else {
-			((mz_stream *)m_state->stream_struct)->avail_in = 0;
-			cmp_status = inflate(m_state->stream_struct, Z_FINISH);
-		}
-		*/
+		cmp_status = inflate(m_state->stream_struct, Z_SYNC_FLUSH);
 
-		if ( (cmp_status == Z_STREAM_END) || ( ((mz_stream *)m_state->stream_struct)->avail_out == 0) ) {
+		if ( (cmp_status == Z_STREAM_END) || ( ((mz_stream *)m_state->stream_struct)->avail_out == 0 ) ) {
 			*uncomp_len = s_outbuf_size - ((mz_stream *)m_state->stream_struct)->avail_out;
 
 			((mz_stream *)m_state->stream_struct)->next_out = m_state->s_outbuf;
@@ -216,16 +200,17 @@ int decompress_block(const char *buf,
 
 			memcpy((void*)pUncomp, m_state->s_outbuf, *uncomp_len);
 			m_state->be_offset += *uncomp_len;
+		}
 
-			*check_lines = cmp_status;
-			return 1;
-		} else
-			*uncomp_len = 0;
+		*check_lines = cmp_status;
 
-		*check_lines = ((mz_stream *)m_state->stream_struct)->avail_out;
-		if ( (cmp_status == Z_OK) || (cmp_status == Z_STREAM_END) )
+		if (cmp_status == Z_STREAM_END || ( (((mz_stream *)m_state->stream_struct)->avail_in == 0) && (*size == 0) ) )
 			return 1;
+		else if (cmp_status != Z_OK)
+			return -1;
+		else
+			return 0;
 	}
-	
-	return 0;
+
+	return -1;
 }

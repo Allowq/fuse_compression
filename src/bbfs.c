@@ -426,81 +426,80 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset, struc
 {
     int retstat = 0;
 	unsigned char *pCmp;
-	unsigned long cmp_len;  
+	unsigned long cmp_len = 0;
 
+/*
 	log_msg("\nbb_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
 	    path, buf, size, offset, fi
 	    );
 
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);
+*/
 
 	if(ends_with(path, ".cmprs_set"))
 		retstat = pwrite(fi->fh, buf, size, offset);
 	else {
 		if (offset == 0) 
 			BB_DATA->compress_state.be_offset = 0;
-			
-		if (is_compressed(path)) {
-			// счётчик строк, сколько успешно выполнилось команд из последовательности
-			int step = 0;
 
-			// выходящий блок у нас по умолчанию 16 кбайт
-			cmp_len = s_outbuf_size;
-			pCmp = (unsigned char*)malloc((size_t)cmp_len);
+		int step = 0, is_finish = 0;
+		unsigned long rewrite_size = size;
 
-			if ( pCmp ) {
-				if (decompress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
-					// если кодировщик готов выдать нам порцию данных
-					if (cmp_len > 0)
-						// то мы её записываем в файл
-						retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
-					else
-						retstat = 0;
+		pCmp = (unsigned char*)malloc((size_t)s_outbuf_size);
 
-					log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+		if ( pCmp ) {
+			if (is_compressed(path)) {
+				while (!is_finish) {
+					switch ( decompress_block(buf, &rewrite_size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
+					case -1:
+						break;
+					case 1:
+						is_finish = 1;
+					case 0:
+						if (cmp_len > 0)
+							retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
+						else
+							retstat = 0;
 
-					if (retstat >= 0) {
-						free(pCmp);
-						return size;
+//						log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+
+						if (retstat < 0)
+							break;
 					}
 				}
-
-				log_msg("\n ERROR RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
-
-				free(pCmp);
-			} 
-			retstat = pwrite(fi->fh, buf, size, offset);
-		}
-		else {
-			int step = 0;
-
-			cmp_len = s_outbuf_size;
-			pCmp = (unsigned char*)malloc((size_t)cmp_len);
-
-			if ( pCmp )
-			{
-				if ( compress_block(buf, size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
-					if (cmp_len > 0)
-						retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
-					else
-						retstat = 0;
-
-					log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
-
-					if (retstat >= 0) {
-						free(pCmp);
-						return size;
-					}
-				}
-
-				log_msg("\n ERROR RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
-
-				free(pCmp);
 			}
-			
-			retstat = pwrite(fi->fh, buf, size, offset);
+			else
+			{
+				while (!is_finish) {
+					switch ( compress_block(buf, &rewrite_size, pCmp, &cmp_len, &BB_DATA->compress_state, &step) ) {
+					case -1:
+						break;
+					case 1:
+						is_finish = 1;
+					case 0:
+						if (cmp_len > 0)
+							retstat = pwrite(fi->fh, pCmp, cmp_len, BB_DATA->compress_state.be_offset - cmp_len);
+						else
+							retstat = 0;
+
+//						log_msg("\n CHECK RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+
+						if (retstat < 0)
+							break;
+					}
+				}
+			}
+
+			if (is_finish && retstat >= 0) {
+				free(pCmp);
+				return size;
+			}
+
+//			log_msg("\n ERROR RETSTAT: %d, cmp_len: %d, cmp_status: %d\n", retstat, cmp_len, step);
+			free(pCmp);
 		}
+		retstat = pwrite(fi->fh, buf, size, offset);
 	}
 
 	if (retstat < 0) 
@@ -562,7 +561,7 @@ int bb_flush(const char *path, struct fuse_file_info *fi)
 {
     int retstat = 0;
     
-    if( (ends_with(path, ".cmprs_set") == 0) ) { // && (is_compressed(path) == 0) ) {
+    if( (ends_with(path, ".cmprs_set") == 0) && (is_compressed(path) == 0) ) {
     	BB_DATA->compress_state.bb_write_final_block = 1;
     	retstat = bb_write(path, NULL, 0, 1, fi);
     	if (retstat >= 0)

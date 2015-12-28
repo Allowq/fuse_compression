@@ -12,13 +12,13 @@
 #include "params.h"
 
 int compress_block(const char *buf, 
-                   const size_t size, 
+                   unsigned long *size,
                    unsigned char *pCmp, 
                    unsigned long *cmp_len, 
                    MINIZ_STATE *m_state, 
                    int *check_lines);
 int decompress_block(const char *buf, 
-                     const size_t size, 
+                     unsigned long *size,
                      unsigned char *pUncomp, 
                      unsigned long *uncomp_len,
                      MINIZ_STATE *m_state, 
