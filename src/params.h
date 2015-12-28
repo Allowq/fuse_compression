@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 #define s_inbuf_size 4096
-#define s_outbuf_size 16382
+#define s_outbuf_size 1048576
 
 typedef struct MINIZ_STATE_STRUCT {
 	int bb_compress_type;
